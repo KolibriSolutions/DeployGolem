@@ -1,0 +1,6 @@
+*.log
+*.yaml
+*.pyc
+__pycache__
+secrets.py
+*.swp
