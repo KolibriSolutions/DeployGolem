@@ -99,6 +99,7 @@ def hook(t, repo):
 
     cwd = config[repo]["cwd"]
 
+    results = ""
     for action in config[repo]["actions"]:
         try:
             grepOut = subprocess.check_output(action.split(' '), cwd=cwd)
@@ -106,6 +107,7 @@ def hook(t, repo):
             error = "action '{}' error code {} output: {}".format(action, grepexc.returncode, grepexc.output)
             app.logger.info("repo: {} => ".format(repo) + error)
             return error, 400
+        results += grepOut.decode() + "\n"
 
     app.logger.info("actions for repo {} done".format(repo))
-    return "done", 200
+    return results, 200
