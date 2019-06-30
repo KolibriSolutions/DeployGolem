@@ -97,6 +97,11 @@ def hook(t, repo):
         app.logger.info("repo {} event {} no action".format(repo, event))
         return "not a {} event, do nothing".format(event), 200
 
+    payload = request.get_json()
+    if payload['ref'] != "refs/heads/" + config[repo]["branch"]:
+        app.logger.info("repo {} event for other ref {}".format(repo, payload['ref']))
+        return "not for branch {}".format(config[repo]["branch"]), 200
+    
     cwd = config[repo]["cwd"]
 
     results = ""
