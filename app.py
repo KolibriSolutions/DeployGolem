@@ -68,15 +68,17 @@ def hook(t, repo):
 
     key = config[repo]["key"]
 
+    payload = request.get_json()
+    app.logger.info("repo {} type {}".format(repo, t))
     if t == "github":
         signature = request.headers.get('X-Hub-Signature')
         if not signature:
             app.logger.info("repo {} missing signature".format(repo))
             return "missing signature", 400
 
-        payload = request.get_data()
+        payload_raw = request.get_data()
 
-        if not check_signature(signature, key, payload):
+        if not check_signature(signature, key, payload_raw):
             app.logger.info("repo {} invalid signature".format(repo))
             return "invalid signature", 403
 
@@ -85,6 +87,24 @@ def hook(t, repo):
         if not event:
             app.logger.info("repo {} missing github event header".format(repo))
             return "missing github event", 400
+    elif t == "gitea":
+        signature = payload.get('secret')
+        
+        if not signature:
+            app.logger.info("repo {} missing secret".format(repo))
+            return "missing secret", 400
+
+        if not werkzeug.security.safe_str_cmp(signature, key):
+            app.logger.info("repo {} invalid secret".format(repo))
+            return "invalid secret", 403
+
+        event = request.headers.get('X-Gitea-Event')
+
+        if not event:
+            app.logger.info("repo {} missing gitea event header".format(repo))
+            return "missing gitea event", 400
+
+
     else:
         app.logger.info("repo {}  unkown type: {}".format(repo, t))
         return "unkown type {}".format(t), 400
@@ -97,7 +117,6 @@ def hook(t, repo):
         app.logger.info("repo {} event {} no action".format(repo, event))
         return "not a {} event, do nothing".format(event), 200
 
-    payload = request.get_json()
     if payload['ref'] != "refs/heads/" + config[repo]["branch"]:
         app.logger.info("repo {} event for other ref {}".format(repo, payload['ref']))
         return "not for branch {}".format(config[repo]["branch"]), 200
