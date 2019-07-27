@@ -103,8 +103,17 @@ def hook(t, repo):
         if not event:
             app.logger.info("repo {} missing gitea event header".format(repo))
             return "missing gitea event", 400
+    elif t == "bitbucket":
+        signature = request.headers.get("X-Hook-UUID")
+        if not signature:
+            app.logger.info("repo {} missing signature UUID header".format(repo))
+            return "missing signature", 400
 
+        event = request.headers.get("X-Event-Key")
 
+        if not event:
+            app.logger.info("repo {} missing event key header".format(repo))
+            return "missing event key header", 400
     else:
         app.logger.info("repo {}  unkown type: {}".format(repo, t))
         return "unkown type {}".format(t), 400
