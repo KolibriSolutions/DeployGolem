@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, abort
 from flask.logging import default_handler
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime
 import logging
 from logging.config import dictConfig
