@@ -63,7 +63,7 @@ def hook(t, repo):
         config = load(stream, Loader=Loader)
 
     if repo not in config:
-        log.info("repo {} not in config".format(repo))
+        app.logger.info("repo {} not in config".format(repo))
         return "repo not in config!", 404
 
     key = config[repo]["key"]
